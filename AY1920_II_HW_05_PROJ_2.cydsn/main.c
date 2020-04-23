@@ -28,7 +28,7 @@
 *                   LIS3DH accelerometer to output 3 Axis accelerometer
 *                   data in Normal Mode at 100 Hz...
 *
-* From datasheet:
+* From datasheet
 *
 *   |**************** CTRL_REG1 register ****************|
 *   | -------- modes ---------  | LowP | ----- axes -----|
