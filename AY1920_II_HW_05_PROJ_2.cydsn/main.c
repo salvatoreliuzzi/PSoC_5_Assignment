@@ -20,25 +20,27 @@
 // Address of the WHO AM I register
 #define LIS3DH_WHO_AM_I_REG_ADDR 0x0F
 
-// Address of the Status register
-#define LIS3DH_STATUS_REG 0x27
-
-
-/* Request 2.2.1.1: Correctly set the control registers of the
+/* Request 2.2.1.1: Correctly set the control registers of the -------------------------------------- /
 *                   LIS3DH accelerometer to output 3 Axis accelerometer
 *                   data in Normal Mode at 100 Hz...
 *
-* From datasheet
+* From datasheet:
 *
 *   |**************** CTRL_REG1 register ****************|
-*   | -------- modes ---------  | LowP | ----- axes -----|
 *   | ODR3 | ODR2 | ODR1 | ODR0 | LPen | Zen | Yen | Xen |
 *   |  0   |  1   |  0   |  1   |  0   |  1  |  1  |  1  | 0x57
+*
+*   ODR[3:0]:   Data rate selection. Default value: 0000
+*                                                   0101 HR / Normal / Low-power mode (100 Hz)
+*   Zen:        Z-axis enable. Default value: 1
+*   Yen:        Y-axis enable. Default value: 1
+*   Xen:        X-axis enable. Default value: 1
+*                             (0: X-axis disabled; 1: X-axis enabled)
 */
-
 // Address of the Control register 1
 // CTRL_REG1(20h)
 #define LIS3DH_CTRL_REG1 0x20
+
 // Hex value to set normal mode to the accelerator
 #define LIS3DH_NORMAL_MODE_CTRL_REG1 0x57
 
@@ -58,6 +60,38 @@
 // CTRL_REG4(23h)
 #define LIS3DH_CTRL_REG4 0x23
 #define LIS3DH_CTRL_REG4_BDU_ACTIVE 0x80
+
+/* Request 2.2.2: Read Output registers at a correct frequency  ----------------------------------- /
+*                 (verify new Data is available using StatusReg
+*                 information). Carefully think about the possible
+*                 options to read data at a constant rate.
+*
+*   |*************** STATUS_REG(27h) ***************|
+*   |ZYXOR| ZOR | YOR | XOR |ZYXDA| ZDA | YDA | XDA |
+*   |  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0  | 0x0
+*/
+
+// Address of the Status register
+#define LIS3DH_STATUS_REG 0x27
+
+// ZYXDA Mask: X, Y and Z-axis new data available. Default value: 0
+#define LIS3DH_STATUS_REG_ZYXDA 0x8
+
+/* OUT_X_L (28h), OUT_X_H (29h)
+*  OUT_Y_L (2Ah), OUT_Y_H (2Bh)
+*  OUT_Z_L (2Ch), OUT_Z_H (2Dh) */
+#define LIS3DH_OUT_X_L 0x28
+
+// Address of FIFO control register ------------------------------------------------------------ /
+// Address of the Control register 5
+// CTRL_REG5(20h)
+#define LIS3DH_CTRL_REG5 0x24
+#define LIS3DH_CTRL_REG5_FIFO_ENABLE 0x0 // FIFO 0x40
+#define LIS3DH_FIFO_CTRL_REG 0x2E
+#define LIS3DH_FIFO_ENABLE 0x0 // FIFO 0x40 / bypass 0x0 / Stream 0x80 / stream to fifo 0xC0
+// NOTE: see FTH[4:0] for timing, i think
+
+/* -------------------------------------------------------------------------------------------- */
 
 // Address of the Temperature Sensor Configuration register
 #define LIS3DH_TEMP_CFG_REG 0x1F
@@ -135,6 +169,7 @@ int main(void)
     /*******************************************************************************************************************/
     /*                                            Read Control Register 1                                              */
     /*******************************************************************************************************************/
+
     uint8_t ctrl_reg1;
     error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
                                         LIS3DH_CTRL_REG1,
@@ -153,7 +188,6 @@ int main(void)
     /*******************************************************************************************************************/
     /*                                                 I2C Writing                                                     */
     /*******************************************************************************************************************/
-
 
     UART_Debug_PutString("\r\nWriting new values..\r\n");
 
@@ -174,6 +208,35 @@ int main(void)
         {
             UART_Debug_PutString("Error occurred during I2C comm to set control register 1\r\n");
         }
+    }
+
+    /*******************************************************************************************************************/
+    /*                                               FIFO mode disabled                                                */
+    /*******************************************************************************************************************/
+
+    /* Previously it seemed as if the data were stuck, maybe because FIFO mode has been enabled in the past
+    *  this mode could be usefull for achiving the following request:
+    *  "Carefully think about the possible options to read data at a constant rate."
+    */
+
+    UART_Debug_PutString("\r\nWriting new values..\r\n");
+
+    error = I2C_Peripheral_WriteRegister(LIS3DH_DEVICE_ADDRESS,
+                                         LIS3DH_CTRL_REG5,
+                                         LIS3DH_CTRL_REG5_FIFO_ENABLE);
+
+    error = I2C_Peripheral_WriteRegister(LIS3DH_DEVICE_ADDRESS,
+                                         LIS3DH_FIFO_CTRL_REG,
+                                         LIS3DH_FIFO_ENABLE);
+
+    if (error == NO_ERROR)
+    {
+        sprintf(message, "FIFO mode disabled");
+        UART_Debug_PutString(message);
+    }
+    else
+    {
+        UART_Debug_PutString("Error occurred writing FIFO mode");
     }
 
     /*******************************************************************************************************************/
@@ -274,32 +337,56 @@ int main(void)
         UART_Debug_PutString("Error occurred during I2C comm to read control register4\r\n");
     }
 
-    int16_t OutTemp;
-    uint8_t header = 0xA0;
-    uint8_t footer = 0xC0;
-    uint8_t OutArray[4];
-    uint8_t TemperatureData[2];
 
+    uint16_t xAcc;
+//    uint16_t yAcc;
+//    uint16_t zAcc;
+
+    uint8_t header = 0xA0;
+    uint8_t tail = 0xC0;
+
+    uint8_t check;
+    uint8_t status; // status of the status register
+
+    uint8_t OutArray[4];
     OutArray[0] = header;
-    OutArray[3] = footer;
+    uint8_t AccData[2];
+    OutArray[3] = tail;
 
     for(;;)
     {
         CyDelay(100);
 
-        error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS, // device_address
-                                                 LIS3DH_OUT_ADC_3L,     // register_address
-                                                 2,                     // register_count 2
-                                                 &TemperatureData[0]);  // data pointer
+        // gathering the LIS3DH_STATUS_REG value
+        error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
+                                            LIS3DH_STATUS_REG,
+                                            &status);
 
+        // Check on ZYXDA cell of status register
+        check = status & LIS3DH_STATUS_REG_ZYXDA;
+
+        // if new data are available
+        if(check == LIS3DH_STATUS_REG_ZYXDA){
+
+        // gathering only x Acc
+        error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS, // device_address
+                                                 LIS3DH_OUT_X_L,        // register_address
+                                                 2,                     // register_count 2
+                                                 &AccData[0]);          // data pointer
+
+
+        }
 
         if(error == NO_ERROR)
         {
-            OutTemp = (int16)((TemperatureData[0] | (TemperatureData[1]<<8)))>>6;
-            OutArray[1] = (uint8_t)(OutTemp & 0xFF);
-            OutArray[2] = (uint8_t)(OutTemp >> 8);
+            // to be checked
+            xAcc = (int16)((AccData[0] | (AccData[1]<<8)))>>6;
+            OutArray[1] = (uint8_t)(xAcc & 0xFF);
+            OutArray[2] = (uint8_t)(xAcc >> 8);
             UART_Debug_PutArray(OutArray, 4);
+
         }
+
     }
 }
 
