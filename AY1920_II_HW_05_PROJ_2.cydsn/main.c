@@ -88,7 +88,7 @@
 #define LIS3DH_CTRL_REG5 0x24
 #define LIS3DH_CTRL_REG5_FIFO_ENABLE 0x0 // FIFO 0x40
 #define LIS3DH_FIFO_CTRL_REG 0x2E
-#define LIS3DH_FIFO_ENABLE 0x0 // FIFO 0x40 / bypass 0x0 / Stream 0x80 / stream to fifo 0xC0
+#define LIS3DH_FIFO_DISABLE 0x0 // FIFO 0x40 / bypass 0x0 / Stream 0x80 / stream to fifo 0xC0
 // NOTE: see FTH[4:0] for timing, i think
 
 /* -------------------------------------------------------------------------------------------- */
@@ -227,7 +227,7 @@ int main(void)
 
     error = I2C_Peripheral_WriteRegister(LIS3DH_DEVICE_ADDRESS,
                                          LIS3DH_FIFO_CTRL_REG,
-                                         LIS3DH_FIFO_ENABLE);
+                                         LIS3DH_FIFO_DISABLE);
 
     if (error == NO_ERROR)
     {
@@ -355,7 +355,7 @@ int main(void)
 
     for(;;)
     {
-        CyDelay(100);
+        CyDelay(10);
 
         // gathering the LIS3DH_STATUS_REG value
         error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
