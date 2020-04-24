@@ -374,7 +374,6 @@ int main(void)
                                                  6,                     // register_count 2
                                                  &AccData[0]);          // data pointer
 
-
         }
 
         if(error == NO_ERROR)
@@ -386,19 +385,17 @@ int main(void)
             scaling (i.e. in mg).
             */
 
-            xAcc = (int16)(((AccData[1]<<8 | AccData[0])))>>6;
-            OutArray[1] = (uint8_t)(xAcc >> 8); // MSB
-            OutArray[2] = (uint8_t)(xAcc);      // LSB
+            xAcc = (int16_t)(((AccData[0] | AccData[1]<<8 )))>>6;
+            OutArray[1] = (uint8_t)(xAcc >> 8);         // LSB
+            OutArray[2] = (uint8_t)(xAcc & 0xFF);       // MSB
 
+            yAcc = (int16_t)(((AccData[2] | AccData[3]<<8)))>>6;
+            OutArray[3] = (uint8_t)(yAcc >> 8);         // LSB
+            OutArray[4] = (uint8_t)(yAcc & 0xFF);       // MSB
 
-            yAcc = (int16)(((AccData[3]<<8 | AccData[2])))>>6;
-            OutArray[3] = (uint8_t)(yAcc >> 8); // MSB
-            OutArray[4] = (uint8_t)(yAcc);      // LSB
-
-            zAcc = (int16)(((AccData[5]<<8 | AccData[4])))>>6;
-            OutArray[5] = (uint8_t)(zAcc >> 8); // MSB
-            OutArray[6] = (uint8_t)(zAcc);      // LSB
-
+            zAcc = (int16_t)(((AccData[4] | AccData[5]<<8)))>>6;
+            OutArray[5] = (uint8_t)(zAcc >> 8);         // LSB
+            OutArray[6] = (uint8_t)(zAcc & 0xFF);       // MSB
 
             UART_Debug_PutArray(OutArray, 8);
 
