@@ -339,8 +339,8 @@ int main(void)
 
 
     uint16_t xAcc;
-//    uint16_t yAcc;
-//    uint16_t zAcc;
+    uint16_t yAcc;
+    uint16_t zAcc;
 
     uint8_t header = 0xA0;
     uint8_t tail = 0xC0;
@@ -348,9 +348,9 @@ int main(void)
     uint8_t check;
     uint8_t status; // status of the status register
 
-    uint8_t OutArray[4];
+    uint8_t OutArray[8];
     OutArray[0] = header;
-    uint8_t AccData[2];
+    uint8_t AccData[6];
     OutArray[3] = tail;
 
     for(;;)
@@ -370,8 +370,8 @@ int main(void)
 
         // gathering only x Acc
         error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS, // device_address
-                                                 LIS3DH_OUT_X_L,        // register_address
-                                                 2,                     // register_count 2
+                                                 LIS3DH_OUT_X_L,        // register_address LIS3DH_OUT_X_L
+                                                 6,                     // register_count 2
                                                  &AccData[0]);          // data pointer
 
 
@@ -379,11 +379,28 @@ int main(void)
 
         if(error == NO_ERROR)
         {
-            // to be checked
-            xAcc = (int16)((AccData[0] | (AccData[1]<<8)))>>6;
-            OutArray[1] = (uint8_t)(xAcc & 0xFF);
-            OutArray[2] = (uint8_t)(xAcc >> 8);
-            UART_Debug_PutArray(OutArray, 4);
+
+            /*
+            Convert the 3 axial outputs of the Accelerometer to 3
+            right-justified 16-bit integers with the correct
+            scaling (i.e. in mg).
+            */
+
+            xAcc = (int16)(((AccData[1]<<8 | AccData[0])))>>6;
+            OutArray[1] = (uint8_t)(xAcc >> 8); // MSB
+            OutArray[2] = (uint8_t)(xAcc);      // LSB
+
+
+            yAcc = (int16)(((AccData[3]<<8 | AccData[2])))>>6;
+            OutArray[3] = (uint8_t)(yAcc >> 8); // MSB
+            OutArray[4] = (uint8_t)(yAcc);      // LSB
+
+            zAcc = (int16)(((AccData[5]<<8 | AccData[4])))>>6;
+            OutArray[5] = (uint8_t)(zAcc >> 8); // MSB
+            OutArray[6] = (uint8_t)(zAcc);      // LSB
+
+
+            UART_Debug_PutArray(OutArray, 8);
 
         }
 
