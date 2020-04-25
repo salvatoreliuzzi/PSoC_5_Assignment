@@ -159,16 +159,16 @@ CYPACKED typedef struct
 #define cy_cfg_data_table ((const cy_cfg_addrvalue_t CYFAR *)0x4800003Cu)
 
 /* IOPORT_7 Address: CYDEV_PRTDSI_PRT12_BASE Size (bytes): 6 */
-#define BS_IOPORT_7_VAL ((const uint8 CYFAR *)0x480002E0u)
+#define BS_IOPORT_7_VAL ((const uint8 CYFAR *)0x480002E8u)
 
 /* UDB_0_1_1_CONFIG Address: CYDEV_UCFG_B1_P4_U0_BASE Size (bytes): 128 */
-#define BS_UDB_0_1_1_CONFIG_VAL ((const uint8 CYFAR *)0x480002E8u)
+#define BS_UDB_0_1_1_CONFIG_VAL ((const uint8 CYFAR *)0x480002F0u)
 
 /* IOPINS0_7 Address: CYREG_PRT12_DR Size (bytes): 10 */
-#define BS_IOPINS0_7_VAL ((const uint8 CYFAR *)0x48000368u)
+#define BS_IOPINS0_7_VAL ((const uint8 CYFAR *)0x48000370u)
 
 /* IOPINS0_1 Address: CYREG_PRT1_DM0 Size (bytes): 8 */
-#define BS_IOPINS0_1_VAL ((const uint8 CYFAR *)0x48000374u)
+#define BS_IOPINS0_1_VAL ((const uint8 CYFAR *)0x4800037Cu)
 
 
 /*******************************************************************************
@@ -228,7 +228,7 @@ static void ClockSetup(void)
 
 
 	/* Configure Digital Clocks based on settings from Clock DWR */
-	CY_SET_XTND_REG16((void CYFAR *)(CYREG_CLKDIST_DCFG0_CFG0), 0x0138u);
+	CY_SET_XTND_REG16((void CYFAR *)(CYREG_CLKDIST_DCFG0_CFG0), 0x009Bu);
 	CY_SET_XTND_REG8((void CYFAR *)(CYREG_CLKDIST_DCFG0_CFG0 + 0x2u), 0x18u);
 
 	/* Configure ILO based on settings from Clock DWR */
