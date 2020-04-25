@@ -27,8 +27,8 @@
 // Address of the WHO AM I register
 #define LIS3DH_WHO_AM_I_REG_ADDR 0x0F
 
-/* Request 2.3.1: Correctly set the control register to
-*                 output a 3 Axis Signal in
+/* Request 2.3.1: Correctly set the control register to 
+*                 output a 3 Axis Signal in 
 *                 High Resolution Mode at 100 Hz in the ±4.0 g FSR
 *
 * From datasheet:
@@ -51,7 +51,7 @@
 #define LIS3DH_NORMAL_MODE_CTRL_REG1 0x57
 
 /*
-* From datasheet:a
+* From datasheet:
 *
 *    FS[1:0]: Full-scale selection. default value: 00
 *             (00: ±2 g; 01: ±4 g; 10: ±8 g; 11: ±16 g)
@@ -65,7 +65,7 @@
 #define LIS3DH_CTRL_REG4 0x23
 #define LIS3DH_CTRL_REG4_BDU_ACTIVE 0x98
 
-/* Request 2.3.2: Read Output registers at a correct frequency
+/* Request 2.3.2: Read Output registers at a correct frequency  
 *                 (verify new Data is available using StatusReg
 *                 information). Carefully think about the possible
 *                 options to read data at a constant rate.
@@ -86,7 +86,7 @@
 *  OUT_Z_L (2Ch), OUT_Z_H (2Dh) */
 #define LIS3DH_OUT_X_L 0x28
 
-// Address of FIFO control register
+// Address of FIFO control register 
 // Address of the Control register 5 - CTRL_REG5(20h)
 #define LIS3DH_CTRL_REG5 0x24
 #define LIS3DH_CTRL_REG5_FIFO_DISABLE 0x0 // FIFO 0x40
@@ -345,19 +345,19 @@ int main(void)
     /*******************************************************************************************************************/
     /*                                             VARIABLE SETTINGS                                                   */
     /*******************************************************************************************************************/
-
-    uint16_t xAcc;  // RAW DATA x-axis Acceleration
+    
+    uint16_t xAcc;  // RAW DATA x-axis Acceleration 
     uint16_t yAcc;
     uint16_t zAcc;
-
-    uint16_t const gravity = 0x0079;
-    float32 const scale_factor = 9810/gravity;
+    
+    uint16_t const gravity = 0x0079; 
+    float32 const scale_factor = 9810/gravity; 
     /*
                     9.81 [m/s^2]                              1g
-    scale_factor = -------------- *1000 = ----------------------------------------------- * (to rescale for simulatin float)
+    scale_factor = -------------- *1000 = ----------------------------------------------- * (to rescale for simulating float)
                        0x0079              Value sensed on z-axis representing 9.81m/s^2
     */
-
+    
     int32_t xAms;   // Float Acceleration times scale factor converted
     int16_t xAms16; // 16 bit casting
     int32_t yAms;
@@ -371,15 +371,15 @@ int main(void)
     uint8_t check;
     uint8_t status; // status of the status register
 
-    uint8_t OutArray[8];
+    uint8_t OutArray[8]; 
     OutArray[0] = header;
-    uint8_t AccData[6];
+    uint8_t AccData[6]; 
     OutArray[7] = tail;
 
     /*******************************************************************************************************************/
     /*                                                    CYCLE                                                        */
     /*******************************************************************************************************************/
-
+    
     for(;;)
     {
         CyDelay(10);
@@ -407,8 +407,8 @@ int main(void)
         {
 
             /*
-            Request 2.3.3.
-            Convert the 3 axial outputs of the Accelerometer
+            Request 2.3.3. 
+            Convert the 3 axial outputs of the Accelerometer 
             to a floating point in m/s2 units.
             */
 
@@ -417,15 +417,15 @@ int main(void)
             xAms16 = (int16_t)(xAms);                                   // 16 bit casting
             OutArray[1] = (uint8_t)(xAms16 >> 8);                       // LSB
             OutArray[2] = (uint8_t)(xAms16 & 0xFF);                     // MSB
-
+            
             yAcc = (int16_t)(((AccData[2] | AccData[3]<<8 )))>>6;
-            yAms = (int32_t)(yAcc*scale_factor);
+            yAms = (int32_t)(yAcc*scale_factor); 
             yAms16 = (int16_t)(yAms);
             OutArray[3] = (uint8_t)(yAms16 >> 8);                       // LSB
             OutArray[4] = (uint8_t)(yAms16 & 0xFF);                     // MSB
-
+            
             zAcc = (int16_t)(((AccData[4] | AccData[5]<<8 )))>>6;
-            zAms = (int32_t)(zAcc*scale_factor);
+            zAms = (int32_t)(zAcc*scale_factor); 
             zAms16 = (int16_t)(zAms);
             OutArray[5] = (uint8_t)(zAms16 >> 8);                       // LSB
             OutArray[6] = (uint8_t)(zAms16 & 0xFF);                     // MSB
