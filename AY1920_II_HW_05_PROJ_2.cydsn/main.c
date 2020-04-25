@@ -9,10 +9,17 @@
 * \date , 2020
 */
 
-// Include required header files
+    /*******************************************************************************************************************/
+    /*                                            INCLUDE HEADER FILES                                                 */
+    /*******************************************************************************************************************/
+
 #include "I2C_Interface.h"
 #include "project.h"
 #include "stdio.h"
+
+    /*******************************************************************************************************************/
+    /*                                               DEFINE ADDRESSES                                                  */
+    /*******************************************************************************************************************/
 
 // 7-bit I2C address of the slave device.
 #define LIS3DH_DEVICE_ADDRESS 0x18
@@ -20,7 +27,7 @@
 // Address of the WHO AM I register
 #define LIS3DH_WHO_AM_I_REG_ADDR 0x0F
 
-/* Request 2.2.1.1: Correctly set the control registers of the -------------------------------------- /
+/* Request 2.2.1.1: Correctly set the control registers of the
 *                   LIS3DH accelerometer to output 3 Axis accelerometer
 *                   data in Normal Mode at 100 Hz...
 *
@@ -37,8 +44,7 @@
 *   Xen:        X-axis enable. Default value: 1
 *                             (0: X-axis disabled; 1: X-axis enabled)
 */
-// Address of the Control register 1
-// CTRL_REG1(20h)
+// Address of the Control register 1 - CTRL_REG1(20h)
 #define LIS3DH_CTRL_REG1 0x20
 
 // Hex value to set normal mode to the accelerator
@@ -46,7 +52,7 @@
 
 /* Request 2.2.1.2: ...in the ±2.0g FSR.
 *
-* From datasheet:
+* From datasheet:a
 *
 *    FS[1:0]: Full-scale selection. default value: 00
 *             (00: ±2 g; 01: ±4 g; 10: ±8 g; 11: ±16 g)
@@ -56,12 +62,11 @@
 *   |  1  |  0  |  0  |  0  | 0  |  0  |  0  |  0  | 0x80
 */
 
-// Address of the Control register 4
-// CTRL_REG4(23h)
+// Address of the Control register 4 - CTRL_REG4(23h)
 #define LIS3DH_CTRL_REG4 0x23
 #define LIS3DH_CTRL_REG4_BDU_ACTIVE 0x80
 
-/* Request 2.2.2: Read Output registers at a correct frequency  ----------------------------------- /
+/* Request 2.2.2: Read Output registers at a correct frequency
 *                 (verify new Data is available using StatusReg
 *                 information). Carefully think about the possible
 *                 options to read data at a constant rate.
@@ -82,16 +87,12 @@
 *  OUT_Z_L (2Ch), OUT_Z_H (2Dh) */
 #define LIS3DH_OUT_X_L 0x28
 
-// Address of FIFO control register ------------------------------------------------------------ /
-// Address of the Control register 5
-// CTRL_REG5(20h)
+// Address of FIFO control register
+// Address of the Control register 5 - CTRL_REG5(20h)
 #define LIS3DH_CTRL_REG5 0x24
 #define LIS3DH_CTRL_REG5_FIFO_DISABLE 0x0 // FIFO 0x40
 #define LIS3DH_FIFO_CTRL_REG 0x2E
 #define LIS3DH_FIFO_DISABLE 0x0 // FIFO 0x40 / bypass 0x0 / Stream 0x80 / stream to fifo 0xC0
-// NOTE: see FTH[4:0] for timing, i think
-
-/* -------------------------------------------------------------------------------------------- */
 
 // Address of the Temperature Sensor Configuration register
 #define LIS3DH_TEMP_CFG_REG 0x1F
@@ -102,6 +103,10 @@
 
 // Address of the ADC output MSB register
 #define LIS3DH_OUT_ADC_3H 0x0D
+
+    /*******************************************************************************************************************/
+    /*                                                    MAIN                                                         */
+    /*******************************************************************************************************************/
 
 int main(void)
 {
@@ -338,6 +343,10 @@ int main(void)
     }
 
 
+    /*******************************************************************************************************************/
+    /*                                             VARIABLE SETTINGS                                                   */
+    /*******************************************************************************************************************/
+
     uint16_t xAcc;
     uint16_t yAcc;
     uint16_t zAcc;
@@ -352,6 +361,10 @@ int main(void)
     OutArray[0] = header;
     uint8_t AccData[6];
     OutArray[3] = tail;
+
+    /*******************************************************************************************************************/
+    /*                                                    CYCLE                                                        */
+    /*******************************************************************************************************************/
 
     for(;;)
     {
