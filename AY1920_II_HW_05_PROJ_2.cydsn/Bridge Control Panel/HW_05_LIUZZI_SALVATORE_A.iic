@@ -1,3 +1,4 @@
-; y axis: mg 
-; x axis: ms
+;x: milliseconds ;
+;y: milli-g
 rx8 [h=A0] @1xAcc @0xAcc @1yAcc @0yAcc @1zAcc @0zAcc [t=C0]
+
