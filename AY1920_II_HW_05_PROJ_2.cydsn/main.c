@@ -360,7 +360,7 @@ int main(void)
     uint8_t OutArray[8];
     OutArray[0] = header;
     uint8_t AccData[6];
-    OutArray[3] = tail;
+    OutArray[7] = tail;
 
     /*******************************************************************************************************************/
     /*                                                    CYCLE                                                        */
@@ -384,7 +384,7 @@ int main(void)
         // gathering only x Acc
         error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS, // device_address
                                                  LIS3DH_OUT_X_L,        // register_address LIS3DH_OUT_X_L
-                                                 6,                     // register_count 2
+                                                 6,                     // register_count 6
                                                  &AccData[0]);          // data pointer
 
         }
