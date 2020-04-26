@@ -368,7 +368,6 @@ int main(void)
 
     for(;;)
     {
-        CyDelay(10);
 
         // gathering the LIS3DH_STATUS_REG value
         error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
@@ -410,6 +409,7 @@ int main(void)
             OutArray[5] = (uint8_t)(zAcc >> 8);         // LSB
             OutArray[6] = (uint8_t)(zAcc & 0xFF);       // MSB
 
+            CyDelay(10);
             UART_Debug_PutArray(OutArray, 8);
 
         }

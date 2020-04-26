@@ -285,7 +285,6 @@ int main(void)
                                                  LIS3DH_OUT_ADC_3L,     // register_address
                                                  2,                     // register_count 2
                                                  &TemperatureData[0]);  // data pointer
-
         
         if(error == NO_ERROR)
         {
@@ -293,6 +292,7 @@ int main(void)
             OutArray[1] = (uint8_t)(OutTemp & 0xFF);
             OutArray[2] = (uint8_t)(OutTemp >> 8);
             UART_Debug_PutArray(OutArray, 4);
+            
         }
     }
 }

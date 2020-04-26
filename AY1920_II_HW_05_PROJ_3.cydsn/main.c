@@ -352,17 +352,15 @@ int main(void)
     
     uint16_t const gravity = 0x0079; 
     float32 const scale_factor = 9810/gravity; 
+    
     /*
                     9.81 [m/s^2]                              1g
     scale_factor = -------------- *1000 = ----------------------------------------------- * (to rescale for simulating float)
                        0x0079              Value sensed on z-axis representing 9.81m/s^2
     */
     
-    int32_t xAms;   // Float Acceleration times scale factor converted
-    int16_t xAms16; // 16 bit casting
-    int32_t yAms;
+    int16_t xAms16; // Float Acceleration times scale factor converted in 16 bit
     int16_t yAms16;
-    int32_t zAms;
     int16_t zAms16;
 
     uint8_t header = 0xA0;
@@ -382,7 +380,6 @@ int main(void)
     
     for(;;)
     {
-        CyDelay(10);
 
         // gathering the LIS3DH_STATUS_REG value
         error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
@@ -412,24 +409,22 @@ int main(void)
             to a floating point in m/s2 units.
             */
 
-            xAcc = (int16_t)(((AccData[0] | AccData[1]<<8 )))>>6;       // RAW DATA x-axis Acceleration
-            xAms = (int32_t)(xAcc*scale_factor);                        // Float Acceleration times scale factor converted
-            xAms16 = (int16_t)(xAms);                                   // 16 bit casting
+            xAcc = (int16_t)(((AccData[0] | AccData[1]<<8 )))>>6;       
+            xAms16 = (int16_t)(xAcc*scale_factor);                      
             OutArray[1] = (uint8_t)(xAms16 >> 8);                       // LSB
             OutArray[2] = (uint8_t)(xAms16 & 0xFF);                     // MSB
             
             yAcc = (int16_t)(((AccData[2] | AccData[3]<<8 )))>>6;
-            yAms = (int32_t)(yAcc*scale_factor); 
-            yAms16 = (int16_t)(yAms);
+            yAms16 = (int16_t)(yAcc*scale_factor); 
             OutArray[3] = (uint8_t)(yAms16 >> 8);                       // LSB
             OutArray[4] = (uint8_t)(yAms16 & 0xFF);                     // MSB
             
             zAcc = (int16_t)(((AccData[4] | AccData[5]<<8 )))>>6;
-            zAms = (int32_t)(zAcc*scale_factor); 
-            zAms16 = (int16_t)(zAms);
+            zAms16 = (int16_t)(zAcc*scale_factor); 
             OutArray[5] = (uint8_t)(zAms16 >> 8);                       // LSB
             OutArray[6] = (uint8_t)(zAms16 & 0xFF);                     // MSB
-
+            
+            CyDelay(10);
             UART_Debug_PutArray(OutArray, 8);
 
         }
