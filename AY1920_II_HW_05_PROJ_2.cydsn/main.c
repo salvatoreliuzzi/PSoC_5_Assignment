@@ -409,7 +409,7 @@ int main(void)
             OutArray[5] = (uint8_t)(zAcc >> 8);         // LSB
             OutArray[6] = (uint8_t)(zAcc & 0xFF);       // MSB
 
-            CyDelay(10);
+            CyDelay(7);
             UART_Debug_PutArray(OutArray, 8);
 
         }
